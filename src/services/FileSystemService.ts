@@ -3,7 +3,8 @@ import fs from "fs/promises";
 import path from "path";
 
 const config = {
-  root: "./tmp/",
+  root: "./tmp/storage/",
+  trash: "./tmp/.trash/",
 };
 
 export type DirectoryListing = {
@@ -71,7 +72,8 @@ const _fileMetadata = async (filepath: string): Promise<DirectoryListing> => {
     filepath: neutralFilepath,
     name: path.basename(neutralFilepath),
     mime: stats.isFile()
-      ? mime.getType(path.basename(neutralFilepath))
+      ? mime.getType(path.basename(neutralFilepath)) ||
+        "application/octet-stream"
       : undefined,
     type: stats.isFile() ? "file" : "directory",
     stats: {

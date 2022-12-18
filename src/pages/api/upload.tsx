@@ -11,7 +11,7 @@ const upload = async (req: NextApiRequest, res: NextApiResponse) => {
   const form = new formidable.IncomingForm({
     multiples: false,
     keepExtensions: true,
-    uploadDir: "./tmp",
+    uploadDir: "./tmp/storage",
     maxTotalFileSize: 200 * 1024 * 1024, // 200 MB
     maxFileSize: 200 * 1024 * 1024, // 200 MB
     maxFieldsSize: 2 * 1024 * 1024, // 2 MB
