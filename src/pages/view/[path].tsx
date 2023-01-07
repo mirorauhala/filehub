@@ -49,7 +49,6 @@ const View: NextPage = ({ fileMetadata }: PageProps) => {
       <AppLayout>
         <GlobalNav />
         <main className="flex min-h-screen w-full flex-col">
-          <h1 className="text-4xl font-black">My Base</h1>
           <p>file</p>
           <pre>{JSON.stringify(fileMetadata, null, 2)}</pre>
 

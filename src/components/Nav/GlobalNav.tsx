@@ -34,10 +34,10 @@ const NavLink = ({
 }: PropsWithChildren<{ href: string; isActive: boolean }>) => (
   <Link
     href={href}
-    className={clsx(
-      "block w-full rounded-xl px-4 py-2 text-lg font-bold hover:bg-gray-100",
-      { "bg-gray-200": isActive }
-    )}
+    className={clsx("block w-full py-2 px-3 text-lg", {
+      "bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-500": isActive,
+      "text-gray-300 hover:bg-gray-800": !isActive,
+    })}
   >
     {children}
   </Link>
@@ -47,8 +47,8 @@ export function GlobalNav() {
   const router = useRouter();
 
   return (
-    <nav className="w-56">
-      <ul className="flex flex-col gap-y-2 p-2">
+    <nav className="fixed top-0 flex w-full justify-between bg-gray-900">
+      <ul className="flex flex-row">
         {links.map((link) => {
           console.log(router.pathname);
           const isActive = link.isActive(router.pathname);
@@ -61,6 +61,19 @@ export function GlobalNav() {
             </li>
           );
         })}
+      </ul>
+
+      <ul className="flex flex-row">
+        <li>
+          <NavLink href={"/"} isActive={false}>
+            Settings
+          </NavLink>
+        </li>
+        <li>
+          <NavLink href={"/"} isActive={false}>
+            Logout
+          </NavLink>
+        </li>
       </ul>
     </nav>
   );
