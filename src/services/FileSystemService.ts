@@ -1,6 +1,7 @@
 import mime from "mime/lite";
 import fs from "fs/promises";
 import path from "path";
+import { toEncodedPath } from "@/support/fs";
 
 const config = {
   root: "./tmp/storage/",
@@ -21,17 +22,8 @@ export type DirectoryListing = {
   };
 };
 
-const makePathSafe = (dirpath: string) => {
-  return path.normalize(dirpath).replace(/^(\.\.(\/|\\|$))+/, "");
-};
-
-export const parentDirectory = (dirpath: string) => path.dirname(dirpath);
-
-export const toReadablePath = (dirpath: string) =>
-  Buffer.from(dirpath, "base64url").toString("utf-8");
-
-const toEncodedPath = (dirpath: string) =>
-  Buffer.from(dirpath).toString("base64url");
+const makePathSafe = (dirpath: string) =>
+  path.normalize(dirpath).replace(/^(\.\.(\/|\\|$))+/, "");
 
 const stripRoot = (dirpath: string) => {
   const root = path.normalize(config.root);

@@ -1,24 +1,27 @@
+import Link from "next/link";
+import Head from "next/head";
+import prettyBytes from "pretty-bytes";
+import { useRouter } from "next/router";
+import { HTMLProps, useEffect, useRef, useState } from "react";
 import { AppLayout } from "@/components/Layouts";
 import { GlobalNav } from "@/components/Nav";
-import { type GetServerSidePropsContext, type NextPage } from "next";
-import Head from "next/head";
-import {
-  type DirectoryListing,
-  FileSystemService,
-  toReadablePath,
-} from "@/services/FileSystemService";
-import prettyBytes from "pretty-bytes";
-import Link from "next/link";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { Toolbar } from "@/components/Toolbar/Toolbar";
+import { Favorites } from "@/components/Favorites";
+import { FileSystemService } from "@/services/FileSystemService";
 import {
   createColumnHelper,
   flexRender,
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useReducer, useState } from "react";
+import type { DirectoryListing } from "@/services/FileSystemService";
+import type { GetServerSidePropsContext, NextPage } from "next";
+import { toEncodedPath, toReadablePath } from "@/support/fs";
 
 type PageProps = {
   listing: DirectoryListing[];
+  currentPath: string;
 };
 
 export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
@@ -33,10 +36,10 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
     return {
       props: {
         listing,
+        currentPath: readableFilepath,
       } as PageProps,
     };
   } catch (error) {
-    console.error("listing", error);
     return {
       redirect: {
         destination: "/d",
@@ -46,60 +49,93 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   }
 };
 
-type File = {
-  name: string;
-  lastName: string;
-  age: number;
-  visits: number;
-  status: string;
-  progress: number;
+type TableDirectoryListing = DirectoryListing & {
+  select: boolean;
 };
 
-const defaultData: DirectoryListing[] = [
-  {
-    base64: "string",
-    filepath: "string",
-    name: "string",
-    mime: "string",
-    type: "file",
-    stats: {
-      createdAt: new Date(),
-      modifiedAt: new Date(),
-      accessTime: new Date(),
-      size: 10,
-    },
-  },
-];
+function IndeterminateCheckbox({
+  indeterminate,
+  className = "",
+  ...rest
+}: { indeterminate?: boolean } & HTMLProps<HTMLInputElement>) {
+  const ref = useRef<HTMLInputElement>(null);
 
-const columnHelper = createColumnHelper<DirectoryListing>();
+  useEffect(() => {
+    if (typeof indeterminate === "boolean" && ref.current) {
+      ref.current.indeterminate = !rest.checked && indeterminate;
+    }
+  }, [ref, indeterminate, rest.checked]);
 
-const columns = [
-  columnHelper.accessor("name", {
-    header: () => "Name",
-    cell: (info) => info.getValue(),
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor((row) => row.stats.size, {
-    id: "size",
-    cell: (info) => (
-      <span className="text-sm text-gray-600">
-        {prettyBytes(info.getValue())}
-      </span>
-    ),
-    header: () => "Size",
-    footer: (info) => info.column.id,
-  }),
-];
+  return (
+    <input
+      type="checkbox"
+      ref={ref}
+      className={className + " cursor-pointer"}
+      {...rest}
+    />
+  );
+}
+const List: NextPage<PageProps> = ({ listing, currentPath }) => {
+  const router = useRouter();
+  const columnHelper = createColumnHelper<TableDirectoryListing>();
 
-const List: NextPage<PageProps> = ({ listing }) => {
-  const [data, setData] = useState(() => [...listing]);
-  const rerender = useReducer(() => ({}), {})[1];
+  const columns = [
+    columnHelper.accessor("select", {
+      header: ({ table }) => (
+        <IndeterminateCheckbox
+          {...{
+            checked: table.getIsAllRowsSelected(),
+            indeterminate: table.getIsSomeRowsSelected(),
+            onChange: table.getToggleAllRowsSelectedHandler(),
+          }}
+        />
+      ),
+      cell: ({ row }) => (
+        <div className="px-1">
+          <IndeterminateCheckbox
+            {...{
+              checked: row.getIsSelected(),
+              indeterminate: row.getIsSomeSelected(),
+              onChange: row.getToggleSelectedHandler(),
+            }}
+          />
+        </div>
+      ),
+    }),
+    columnHelper.accessor("name", {
+      header: () => "Name",
+      cell: (info) => info.getValue(),
+    }),
+    columnHelper.accessor((row) => row.stats.size, {
+      id: "size",
+      cell: (info) => (
+        <span className="text-sm text-gray-600">
+          {prettyBytes(info.getValue(), {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+          })}
+        </span>
+      ),
+      header: () => "Size",
+    }),
+    columnHelper.accessor((row) => row.stats.createdAt, {
+      id: "createdAt",
+      cell: (info) => (
+        <span className="text-sm text-gray-600">
+          {info.getValue().toISOString()}
+        </span>
+      ),
+      header: () => "Size",
+    }),
+  ];
 
   const table = useReactTable({
-    data,
+    data: listing as TableDirectoryListing[],
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
+
+  useEffect(() => table.reset(), [currentPath, table]);
 
   return (
     <>
@@ -151,91 +187,22 @@ const List: NextPage<PageProps> = ({ listing }) => {
             </tbody>
           </table>
 
-          <div className="bt-2 border-b px-2 py-1">
-            <ul className="flex">
-              <li className="after:px-0.5 after:text-gray-300 [&:not(:last-child)]:after:content-['/'] ">
-                <Link
-                  href={"/"}
-                  className="inline-block rounded-lg border border-transparent px-1 py-0.5 text-gray-500 transition duration-75 ease-in-out hover:bg-gray-100 hover:text-gray-700"
-                >
-                  Files
-                </Link>
-              </li>
-              <li className="after:px-0.5 after:text-gray-300 [&:not(:last-child)]:after:content-['/'] ">
-                <Link
-                  href={"/"}
-                  className="inline-block rounded-lg border border-transparent px-1 py-0.5 text-gray-500 transition duration-75 ease-in-out hover:bg-gray-100 hover:text-gray-700"
-                >
-                  cats
-                </Link>
-              </li>
-              <li className="after:px-0.5 after:text-gray-300 [&:not(:last-child)]:after:content-['/'] ">
-                <Link
-                  href={"/"}
-                  className="inline-block rounded-lg border border-transparent px-1 py-0.5 text-gray-500 transition duration-75 ease-in-out hover:bg-gray-100 hover:text-gray-700"
-                >
-                  tabbies
-                </Link>
-              </li>
-              <li className="after:px-0.5 after:text-gray-300 [&:not(:last-child)]:after:content-['/'] ">
-                <Link
-                  href={"/"}
-                  className="inline-block rounded-lg border border-transparent px-1 py-0.5 text-gray-500 transition duration-75 ease-in-out hover:bg-gray-100 hover:text-gray-700"
-                >
-                  super cute
-                </Link>
-              </li>
-            </ul>
-          </div>
-          <div className="border-b px-2">
-            <ul className="flex gap-2 py-2">
-              <li>
-                <Link
-                  href="/"
-                  className="block rounded bg-blue-100 py-0.5 px-2 text-blue-700"
-                >
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/"
-                  className="block rounded bg-green-100 py-0.5 px-2 text-green-700"
-                >
-                  Work
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/"
-                  className="block rounded bg-amber-100 py-0.5 px-2 text-amber-700"
-                >
-                  Pictures
-                </Link>
-              </li>
-            </ul>
-          </div>
+          <Breadcrumbs path={currentPath} />
+
+          <Favorites
+            favorites={[
+              { name: "Home", href: toEncodedPath("/home") },
+              { name: "Work", href: toEncodedPath("/work") },
+              { name: "Personal", href: toEncodedPath("/personal") },
+              { name: "Company", href: toEncodedPath("/company") },
+              { name: "Gallery", href: toEncodedPath("/gallery") },
+            ]}
+          />
 
           <div className="mx-auto w-full max-w-7xl">
             <h1 className="px-4 py-5 text-4xl font-extrabold">My Files</h1>
 
-            <div className="flex justify-between gap-2 px-4">
-              <div className="flex gap-1">
-                <button className="mb-3 rounded bg-gray-200 px-2 py-0.5 text-lg  text-gray-900">
-                  New
-                </button>
-                <button className="mb-3 rounded bg-gray-200 px-2 py-0.5 text-lg  text-gray-900">
-                  Rename
-                </button>
-                <button className="mb-3 rounded bg-gray-200 px-2 py-0.5 text-lg  text-gray-900">
-                  Share
-                </button>
-              </div>
-              <button className="mb-3 rounded bg-red-200 px-2 py-0.5 text-lg text-red-900  text-gray-900">
-                Delete
-              </button>
-            </div>
-
+            <Toolbar />
             <table className="w-full">
               <thead>
                 {table.getHeaderGroups().map((headerGroup) => (
@@ -260,13 +227,13 @@ const List: NextPage<PageProps> = ({ listing }) => {
                 {table.getRowModel().rows.map((row) => (
                   <tr
                     key={row.id}
-                    className="cursor-pointer select-none border-y border-gray-200 text-gray-800  hover:border-indigo-200 hover:bg-indigo-50"
-                    onClick={() => {
+                    className="cursor-pointer select-none border-t border-gray-200 text-gray-800  hover:border-indigo-200 hover:bg-indigo-50"
+                    onDoubleClick={() => {
                       const { original } = row;
                       if (original.type === "directory") {
-                        window.location.href = `/d/${original.base64}`;
+                        router.push(`/d/${original.base64}`);
                       } else {
-                        window.location.href = `/view/${original.base64}`;
+                        router.push(`/view/${original.base64}`);
                       }
                     }}
                   >

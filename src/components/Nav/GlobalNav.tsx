@@ -12,7 +12,7 @@ type NavLink = {
 const links: NavLink[] = [
   {
     href: "/",
-    label: "Home",
+    label: "Files",
     isActive: (pathname) => pathname.startsWith("/d"),
   },
   {
@@ -50,7 +50,6 @@ export function GlobalNav() {
     <nav className="fixed top-0 flex w-full justify-between bg-gray-900">
       <ul className="flex flex-row">
         {links.map((link) => {
-          console.log(router.pathname);
           const isActive = link.isActive(router.pathname);
 
           return (
