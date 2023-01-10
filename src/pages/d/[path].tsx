@@ -187,8 +187,6 @@ const List: NextPage<PageProps> = ({ listing, currentPath }) => {
             </tbody>
           </table>
 
-          <Breadcrumbs path={currentPath} />
-
           <Favorites
             favorites={[
               { name: "Home", href: toEncodedPath("/home") },
@@ -200,7 +198,7 @@ const List: NextPage<PageProps> = ({ listing, currentPath }) => {
           />
 
           <div className="mx-auto w-full max-w-7xl">
-            <h1 className="px-4 py-5 text-4xl font-extrabold">My Files</h1>
+            <Breadcrumbs path={currentPath} />
 
             <Toolbar />
             <table className="w-full">
