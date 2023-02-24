@@ -9,7 +9,7 @@ import {
   FileSystemService,
 } from "@/services/FileSystemService";
 import { redirectTo } from "@/utils/redirect";
-import { toReadablePath } from "@/support/fs";
+import { toPlaintext } from "@/support/fs";
 
 type PageProps = {
   fileMetadata: DirectoryListing;
@@ -18,12 +18,12 @@ type PageProps = {
 export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   const path = ctx.query.path as string;
 
-  const readableFilepath = toReadablePath(path);
+  const readableFilepath = toPlaintext(path);
 
   const file = await FileSystemService.getFileMetadata(readableFilepath);
 
   if (file.type === "directory") {
-    return redirectTo(`/d/${file.base64}`);
+    return redirectTo(`/d/${file.urn}`);
   }
 
   return {
@@ -38,7 +38,7 @@ const View: NextPage<PageProps> = ({ fileMetadata }) => {
     <>
       <Head>
         <title>Filebase</title>
-        <meta name="description" content="Homebase" />
+        <meta name="description" content="Filebase" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 

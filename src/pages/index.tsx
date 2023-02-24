@@ -1,9 +1,17 @@
+import { encode } from "@/support/coding";
+import { urnApi } from "@/support/urn";
 import { redirectTo } from "@/utils/redirect";
 
 export const getServerSideProps = async () => {
-  const storageIndex = Buffer.from("/").toString("base64url");
+  const indexUrn = urnApi.format({
+    section: "fs",
+    type: "cloud",
+    resource: "/",
+  });
 
-  return redirectTo("/d/" + storageIndex);
+  const encodedUrn = encode(indexUrn);
+
+  return redirectTo("/d/" + encodedUrn);
 };
 
 export default function Page() {

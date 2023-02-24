@@ -1,4 +1,4 @@
-import { toEncodedPath } from "@/support/fs";
+import { encode } from "@/support/coding";
 import Link from "next/link";
 import { type PropsWithChildren } from "react";
 
@@ -30,7 +30,7 @@ export function Breadcrumbs({ path }: BreadcrumbsProps) {
     .filter(Boolean)
     .map((name, index) => ({
       name,
-      href: toEncodedPath(
+      href: encode(
         path
           .split("/")
           .filter(Boolean)

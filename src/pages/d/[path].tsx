@@ -2,7 +2,7 @@ import Link from "next/link";
 import Head from "next/head";
 import prettyBytes from "pretty-bytes";
 import { useRouter } from "next/router";
-import { type HTMLProps, useEffect, useRef } from "react";
+import { type HTMLProps, useEffect, useRef, useState } from "react";
 import { AppLayout } from "@/components/Layouts";
 import { GlobalNav } from "@/components/Nav";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
@@ -10,6 +10,7 @@ import { Toolbar } from "@/components/Toolbar";
 import { Favorites } from "@/components/Favorites";
 import { FileSystemService } from "@/services/FileSystemService";
 import {
+  type RowSelectionState,
   createColumnHelper,
   flexRender,
   getCoreRowModel,
@@ -17,7 +18,9 @@ import {
 } from "@tanstack/react-table";
 import type { DirectoryListing } from "@/services/FileSystemService";
 import type { GetServerSidePropsContext, NextPage } from "next";
-import { toEncodedPath, toReadablePath } from "@/support/fs";
+import { encode, decode } from "@/support/coding";
+import { trpc } from "@/utils/trpc";
+import { urnApi } from "@/support/urn";
 
 type PageProps = {
   listing: DirectoryListing[];
@@ -26,22 +29,15 @@ type PageProps = {
 
 export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   const path = ctx.query.path as string;
-  const readableFilepath = toReadablePath(path);
+  const parsedUrn = decode(path);
 
-  try {
-    const listing = await FileSystemService.getDirectoryListing(
-      readableFilepath
-    );
+  const listing = await FileSystemService.getDirectoryListing(parsedUrn);
 
-    return {
-      props: {
-        listing,
-        currentPath: readableFilepath,
-      } as PageProps,
-    };
-  } catch (error) {
-    throw new Error("Directory not found");
-  }
+  return {
+    props: {
+      listing,
+    } as PageProps,
+  };
 };
 
 type TableDirectoryListing = DirectoryListing & {
@@ -70,9 +66,15 @@ function IndeterminateCheckbox({
     />
   );
 }
-const List: NextPage<PageProps> = ({ listing, currentPath }) => {
+const List: NextPage<PageProps> = ({ listing }) => {
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const router = useRouter();
   const columnHelper = createColumnHelper<TableDirectoryListing>();
+
+  const urn = urnApi.parse(decode(router.query.path as string));
+  const currentPath = urn.resource;
+
+  const rowSelectionCount = Object.keys(rowSelection).length;
 
   const columns = [
     columnHelper.accessor("select", {
@@ -127,8 +129,25 @@ const List: NextPage<PageProps> = ({ listing, currentPath }) => {
   const table = useReactTable({
     data: listing as TableDirectoryListing[],
     columns,
+    state: {
+      rowSelection,
+    },
     getCoreRowModel: getCoreRowModel(),
+    enableRowSelection: true,
+    onRowSelectionChange: setRowSelection,
   });
+
+  const moveToTrash = trpc.brain.moveToTrash.useMutation();
+
+  const handleDelete = () => {
+    const fileIds = table
+      .getSelectedRowModel()
+      .flatRows.map((row) => ({ src: row.original.urn }));
+
+    moveToTrash.mutate(fileIds);
+
+    // router.reload();
+  };
 
   useEffect(() => table.reset(), [currentPath, table]);
 
@@ -168,10 +187,10 @@ const List: NextPage<PageProps> = ({ listing, currentPath }) => {
                       <td>2021-01-01</td>
                       <td>
                         {file.type === "directory" && (
-                          <Link href={`/d/${file.base64}`}>Enter</Link>
+                          <Link href={`/d/${file.urn}`}>Enter</Link>
                         )}
                         {file.type === "file" && (
-                          <Link href={`/view/${file.base64}`}>View</Link>
+                          <Link href={`/view/${file.urn}`}>View</Link>
                         )}
                         <button>Rename</button>
                         <button>Delete</button>
@@ -184,18 +203,20 @@ const List: NextPage<PageProps> = ({ listing, currentPath }) => {
 
           <Favorites
             favorites={[
-              { name: "Home", href: toEncodedPath("/home") },
-              { name: "Work", href: toEncodedPath("/work") },
-              { name: "Personal", href: toEncodedPath("/personal") },
-              { name: "Company", href: toEncodedPath("/company") },
-              { name: "Gallery", href: toEncodedPath("/gallery") },
+              { name: "Home", href: encode("/home") },
+              { name: "Work", href: encode("/work") },
+              { name: "Personal", href: encode("/personal") },
+              { name: "Company", href: encode("/company") },
+              { name: "Gallery", href: encode("/gallery") },
             ]}
           />
 
           <div className="mx-auto w-full max-w-7xl">
             <Breadcrumbs path={currentPath} />
-
-            <Toolbar />
+            <Toolbar
+              selectionCount={rowSelectionCount}
+              onDelete={handleDelete}
+            />
             <table className="w-full">
               <thead>
                 {table.getHeaderGroups().map((headerGroup) => (
@@ -224,9 +245,9 @@ const List: NextPage<PageProps> = ({ listing, currentPath }) => {
                     onDoubleClick={() => {
                       const { original } = row;
                       if (original.type === "directory") {
-                        router.push(`/d/${original.base64}`);
+                        router.push(`/d/${encode(original.urn)}`);
                       } else {
-                        router.push(`/view/${original.base64}`);
+                        router.push(`/view/${encode(original.urn)}`);
                       }
                     }}
                   >
@@ -242,6 +263,8 @@ const List: NextPage<PageProps> = ({ listing, currentPath }) => {
                 ))}
               </tbody>
             </table>
+            {Object.keys(rowSelection).length} of{" "}
+            {table.getPreFilteredRowModel().rows.length} Total Rows Selected
           </div>
         </main>
       </AppLayout>
