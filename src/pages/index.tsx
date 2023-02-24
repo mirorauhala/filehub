@@ -1,12 +1,9 @@
+import { redirectTo } from "@/utils/redirect";
+
 export const getServerSideProps = async () => {
   const storageIndex = Buffer.from("/").toString("base64url");
 
-  return {
-    redirect: {
-      destination: `/d/${storageIndex}`,
-      permanent: false,
-    },
-  };
+  return redirectTo("/d/" + storageIndex);
 };
 
 export default function Page() {

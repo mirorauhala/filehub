@@ -2,11 +2,11 @@ import Link from "next/link";
 import Head from "next/head";
 import prettyBytes from "pretty-bytes";
 import { useRouter } from "next/router";
-import { HTMLProps, useEffect, useRef, useState } from "react";
+import { type HTMLProps, useEffect, useRef } from "react";
 import { AppLayout } from "@/components/Layouts";
 import { GlobalNav } from "@/components/Nav";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
-import { Toolbar } from "@/components/Toolbar/Toolbar";
+import { Toolbar } from "@/components/Toolbar";
 import { Favorites } from "@/components/Favorites";
 import { FileSystemService } from "@/services/FileSystemService";
 import {
@@ -40,12 +40,7 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
       } as PageProps,
     };
   } catch (error) {
-    return {
-      redirect: {
-        destination: "/d",
-        permanent: false,
-      },
-    };
+    throw new Error("Directory not found");
   }
 };
 

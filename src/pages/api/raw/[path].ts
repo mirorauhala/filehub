@@ -1,9 +1,7 @@
 import { type NextApiRequest, type NextApiResponse } from "next";
-import {
-  FileSystemService,
-  toReadablePath,
-} from "@/services/FileSystemService";
+import { FileSystemService } from "@/services/FileSystemService";
 import mime from "mime/lite";
+import { toReadablePath } from "@/support/fs";
 
 const raw = async (req: NextApiRequest, res: NextApiResponse) => {
   const path = req.query.path as string;
