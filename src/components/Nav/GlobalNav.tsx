@@ -2,28 +2,46 @@ import clsx from "clsx";
 import Link from "next/link";
 import { type PropsWithChildren } from "react";
 import { useRouter } from "next/router";
+import { urnApi } from "@/support/urn";
+import { encode } from "@/support/coding";
 
 type NavLink = {
   href: string;
   label: string;
-  isActive: (pathname: string) => boolean;
+  isActive: (activePage: string) => boolean;
 };
 
 const links: NavLink[] = [
   {
-    href: "/",
+    href:
+      "/d/" +
+      encode(
+        urnApi.format({
+          section: "fs",
+          type: "cloud",
+          resource: "/",
+        })
+      ),
     label: "Files",
-    isActive: (pathname) => pathname.startsWith("/d"),
+    isActive: (activePage) => activePage === "cloud",
   },
   {
     href: "/upload",
     label: "Upload",
-    isActive: (pathname) => pathname.startsWith("/upload"),
+    isActive: (activePage) => activePage === "upload",
   },
   {
-    href: "/d?trash",
+    href:
+      "/d/" +
+      encode(
+        urnApi.format({
+          section: "fs",
+          type: "trash",
+          resource: "/",
+        })
+      ),
     label: "Trash",
-    isActive: (pathname) => pathname.startsWith("/trash"),
+    isActive: (activePage) => activePage === "trash",
   },
 ];
 
@@ -43,14 +61,12 @@ const NavLink = ({
   </Link>
 );
 
-export function GlobalNav() {
-  const router = useRouter();
-
+export function GlobalNav({ activePage }: { activePage: string }) {
   return (
     <nav className="fixed top-0 flex w-full justify-between bg-gray-900">
       <ul className="flex flex-row">
         {links.map((link) => {
-          const isActive = link.isActive(router.pathname);
+          const isActive = link.isActive(activePage);
 
           return (
             <li key={link.href}>

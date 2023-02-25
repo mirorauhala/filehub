@@ -34,16 +34,13 @@ const getAppPathForUrnType = (type: string) => {
 const makeSafePath = (dirpath: string) =>
   path.normalize(dirpath).replace(/^(\.\.(\/|\\|$))+/, "");
 
-const ensurePathStartsWithSlash = (dirpath: string) =>
-  dirpath.startsWith("/") ? dirpath : `/${dirpath}`;
-
 /**
  * Build directory path from URN.
  *
  * @param URN
  * @returns directory path
  */
-const buildPath = (urn: string) => {
+const buildAbsolutePath = (urn: string) => {
   const parsedUrn = urnApi.parse(urn);
 
   if (parsedUrn.section !== "fs") {
@@ -52,10 +49,7 @@ const buildPath = (urn: string) => {
 
   const appPath = getAppPathForUrnType(parsedUrn.type);
 
-  return path.join(
-    appPath,
-    ensurePathStartsWithSlash(makeSafePath(parsedUrn.resource))
-  );
+  return path.join(appPath, makeSafePath(parsedUrn.resource));
 };
 
 const stripRoot = (dirpath: string) => {
@@ -66,16 +60,21 @@ const stripRoot = (dirpath: string) => {
 };
 
 const getDirectoryListing = async (urn: string) => {
-  const directoryPath = buildPath(urn);
+  const parsedUrn = urnApi.parse(urn);
+  const directoryPath = buildAbsolutePath(urn);
 
   const files = await fs.readdir(directoryPath, {
     withFileTypes: true,
   });
 
   const listing = files.map((file) => {
-    const filePath = path.join(directoryPath, file.name);
+    const fileUrn = urnApi.format({
+      section: "fs",
+      type: parsedUrn.type,
+      resource: file.name,
+    });
 
-    return _fileMetadata(urn, filePath);
+    return _fileMetadata(fileUrn);
   });
 
   return Promise.all(listing);
@@ -87,28 +86,19 @@ const getRawFile = async (filepath: string) => {
   return await fs.readFile(safePath);
 };
 
-const _fileMetadata = async (
-  directoryUrn: string,
-  filepath: string
-): Promise<DirectoryListing> => {
-  const parsedDirectoryUrn = urnApi.parse(directoryUrn);
-  const fileUrn = urnApi.format({
-    section: "fs",
-    type: parsedDirectoryUrn.type,
-    resource: path.join(parsedDirectoryUrn.resource, path.basename(filepath)),
-  });
+const _fileMetadata = async (urn: string): Promise<DirectoryListing> => {
+  const parsedUrn = urnApi.parse(urn);
+  const filepath = parsedUrn.resource;
+  const absolutePath = buildAbsolutePath(urn);
 
-  const stats = await fs.stat(filepath);
-
-  const neutralFilepath = stripRoot(filepath);
+  const stats = await fs.stat(absolutePath);
 
   return {
-    urn: fileUrn,
-    filepath: neutralFilepath,
-    name: path.basename(neutralFilepath),
+    urn,
+    filepath,
+    name: path.basename(filepath),
     mime: stats.isFile()
-      ? mime.getType(path.basename(neutralFilepath)) ||
-        "application/octet-stream"
+      ? mime.getType(path.basename(filepath)) || "application/octet-stream"
       : undefined,
     type: stats.isFile() ? "file" : "directory",
     stats: {
@@ -128,16 +118,42 @@ const moveTo = async (source: string, destination: string) => {
 };
 
 const moveToTrash = async (source: string) => {
-  const sourcePath = config.root + makeSafePath(source);
-  const trashPath = config.trash + makeSafePath(source);
+  const fileFromUrn = urnApi.parse(source);
 
-  await moveTo(sourcePath, trashPath);
+  if (fileFromUrn.section !== "fs") {
+    throw new Error("This operation is only supported for fs section");
+  }
+
+  if (fileFromUrn.type !== "cloud") {
+    throw new Error("This operation is only supported for cloud URNs");
+  }
+
+  if (fileFromUrn.resource === "/") {
+    throw new Error("Cannot move root directory to trash");
+  }
+
+  const resource = makeSafePath(fileFromUrn.resource);
+
+  console.log("Moving", resource, "to trash");
+
+  const sourcePath = config.root + resource;
+  const trashPath = config.trash + resource;
+
+  await move(sourcePath, trashPath);
 };
 
-const getFileMetadata = async (filepath: string) => {
-  const safePath = config.root + makeSafePath(filepath);
+const getFileMetadata = async (urn: string) => {
+  const decodedUrn = urnApi.parse(urn);
 
-  return _fileMetadata(safePath);
+  if (decodedUrn.section !== "fs") {
+    throw new Error("Only fs section is supported");
+  }
+
+  if (decodedUrn.type !== "cloud") {
+    throw new Error("Only cloud URNs are supported");
+  }
+
+  return _fileMetadata(urn);
 };
 
 export const FileSystemService = {

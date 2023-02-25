@@ -24,18 +24,20 @@ import { urnApi } from "@/support/urn";
 
 type PageProps = {
   listing: DirectoryListing[];
-  currentPath: string;
+  activePage: string;
 };
 
 export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   const path = ctx.query.path as string;
   const parsedUrn = decode(path);
+  const urnObject = urnApi.parse(parsedUrn);
 
   const listing = await FileSystemService.getDirectoryListing(parsedUrn);
 
   return {
     props: {
       listing,
+      activePage: urnObject.type,
     } as PageProps,
   };
 };
@@ -66,7 +68,8 @@ function IndeterminateCheckbox({
     />
   );
 }
-const List: NextPage<PageProps> = ({ listing }) => {
+
+const List: NextPage<PageProps> = ({ listing, activePage }) => {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const router = useRouter();
   const columnHelper = createColumnHelper<TableDirectoryListing>();
@@ -160,7 +163,7 @@ const List: NextPage<PageProps> = ({ listing }) => {
       </Head>
 
       <AppLayout>
-        <GlobalNav />
+        <GlobalNav activePage={activePage} />
 
         <main className="flex min-h-screen w-full flex-col">
           <table className="hidden w-full">
@@ -215,6 +218,7 @@ const List: NextPage<PageProps> = ({ listing }) => {
             <Breadcrumbs path={currentPath} />
             <Toolbar
               selectionCount={rowSelectionCount}
+              activePage={activePage}
               onDelete={handleDelete}
             />
             <table className="w-full">

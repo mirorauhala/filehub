@@ -9,7 +9,7 @@ import {
   FileSystemService,
 } from "@/services/FileSystemService";
 import { redirectTo } from "@/utils/redirect";
-import { toPlaintext } from "@/support/fs";
+import { decode } from "@/support/coding";
 
 type PageProps = {
   fileMetadata: DirectoryListing;
@@ -18,9 +18,9 @@ type PageProps = {
 export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   const path = ctx.query.path as string;
 
-  const readableFilepath = toPlaintext(path);
+  const urn = decode(path);
 
-  const file = await FileSystemService.getFileMetadata(readableFilepath);
+  const file = await FileSystemService.getFileMetadata(urn);
 
   if (file.type === "directory") {
     return redirectTo(`/d/${file.urn}`);

@@ -19,6 +19,9 @@ const util = createUrnUtil("frn", {
   components: ["section", "type", "resource"],
 });
 
+export const ensurePathStartsWithSlash = (dirpath: string) =>
+  dirpath.startsWith("/") ? dirpath : `/${dirpath}`;
+
 export const urnApi = {
   format: ({
     section,
@@ -29,7 +32,7 @@ export const urnApi = {
     type: string;
     resource: string;
   }) => {
-    const encodedResource = encode(resource);
+    const encodedResource = encode(ensurePathStartsWithSlash(resource));
 
     return util.format({ section, type, resource: encodedResource });
   },

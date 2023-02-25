@@ -33,7 +33,7 @@ const Upload: NextPage = () => {
       </Head>
 
       <AppLayout>
-        <GlobalNav />
+        <GlobalNav activePage="upload" />
         <main className="flex min-h-screen flex-col">
           <form onSubmit={handleSubmit(onSubmit)}>
             <input type="file" {...register("file")} multiple={true} />
