@@ -1,12 +1,5 @@
 import type { PropsWithChildren } from "react";
-
-function Button({ children }: PropsWithChildren) {
-  return (
-    <button className="mb-3 rounded bg-slate-200 px-2 py-0.5 text-lg text-slate-900">
-      {children}
-    </button>
-  );
-}
+import { useFilesDispatch } from "../FileBrowser";
 
 function ButtonRed(
   props: PropsWithChildren<React.ButtonHTMLAttributes<HTMLButtonElement>>
@@ -35,6 +28,23 @@ export function Toolbar({
   onPermanentDelete?: () => void;
   onRestore: () => void;
 }) {
+  const dispatch = useFilesDispatch();
+
+  if (!dispatch) throw new Error("No dispatch found!");
+
+  const handleNewFile = () => {
+    const name = window.prompt("Enter a name for the new file");
+    if (name) {
+      dispatch({
+        type: "ADD_FILE",
+        payload: {
+          id: Math.round(Math.random() * 100),
+          name: "hamster.jpg",
+        },
+      });
+    }
+  };
+
   if (activePage === "trash") {
     return (
       <div className="flex h-11 justify-between gap-2 px-4">
@@ -51,7 +61,7 @@ export function Toolbar({
   return (
     <div className="flex justify-between gap-2 px-4">
       <div className="flex gap-1">
-        <Button>New...</Button>
+        <Button onClick={handleNewFile}>New...</Button>
         <Button>Upload...</Button>
         {selectionCount > 0 && (
           <>

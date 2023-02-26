@@ -21,6 +21,11 @@ import type { GetServerSidePropsContext, NextPage } from "next";
 import { encode, decode } from "@/support/coding";
 import { trpc } from "@/utils/trpc";
 import { urnApi } from "@/support/urn";
+import {
+  FileTable,
+  FileToolbar,
+  FilesProvider,
+} from "@/components/FileBrowser";
 
 type PageProps = {
   listing: DirectoryListing[];
@@ -216,11 +221,10 @@ const List: NextPage<PageProps> = ({ listing, activePage }) => {
 
           <div className="mx-auto w-full max-w-7xl">
             <Breadcrumbs path={currentPath} />
-            <Toolbar
-              selectionCount={rowSelectionCount}
-              activePage={activePage}
-              onDelete={handleDelete}
-            />
+            <FilesProvider>
+              <FileToolbar />
+              <FileTable />
+            </FilesProvider>
             <table className="w-full">
               <thead>
                 {table.getHeaderGroups().map((headerGroup) => (
