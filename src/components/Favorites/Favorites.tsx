@@ -1,5 +1,7 @@
 import Link from "next/link";
-import type { PropsWithChildren } from "react";
+import { type PropsWithChildren } from "react";
+import { Hover } from "@/hooks/Hover/Hover";
+import { useHover } from "@/hooks/Hover/useHover";
 
 export function Favorite({
   href,
@@ -10,7 +12,7 @@ export function Favorite({
   return (
     <Link
       href={href}
-      className="block rounded bg-blue-100 py-0.5 px-2 text-blue-700"
+      className="relative z-10 block rounded py-0.5 px-2 text-neutral-600 hover:text-neutral-600"
     >
       {children}
     </Link>
@@ -18,10 +20,17 @@ export function Favorite({
 }
 
 type Favorite = { href: string; name: string };
+
 export function Favorites({ favorites }: { favorites: Favorite[] }) {
+  const { navRef, hoverRef } = useHover<HTMLDivElement, HTMLDivElement>({
+    top: 8,
+    left: 8,
+  });
+
   return (
-    <div className="border-b px-2">
-      <ul className="flex gap-2 py-2">
+    <div className="relative border-b px-2" ref={navRef}>
+      <Hover ref={hoverRef} className="absolute rounded bg-neutral-100" />
+      <ul className="peer flex gap-0.5 py-2">
         {favorites.length > 0 &&
           favorites.map((favorite) => (
             <li key={favorite.href}>
