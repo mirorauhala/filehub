@@ -12,7 +12,7 @@ export function Favorite({
   return (
     <Link
       href={href}
-      className="relative z-10 block rounded py-0.5 px-2 text-neutral-600 hover:text-neutral-600"
+      className="relative z-10 block rounded px-2 py-0.5 text-neutral-600 hover:text-neutral-600"
     >
       {children}
     </Link>
@@ -34,7 +34,7 @@ export function Favorites({ favorites }: { favorites: Favorite[] }) {
         {favorites.length > 0 &&
           favorites.map((favorite) => (
             <li key={favorite.href}>
-              <Favorite href={favorite.href}>{favorite.name}</Favorite>
+              <Favorite href={`/d/${favorite.href}`}>{favorite.name}</Favorite>
             </li>
           ))}
       </ul>

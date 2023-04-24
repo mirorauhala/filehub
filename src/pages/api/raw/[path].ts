@@ -1,18 +1,23 @@
 import { type NextApiRequest, type NextApiResponse } from "next";
-import { FileSystemService } from "@/services/FileSystemService";
 import mime from "mime/lite";
-import { toReadablePath } from "@/support/fs";
+import { decode } from "@/support/coding";
+import { wd } from "@/server/webdav";
+import { getFileStat } from "@/utils/webdav";
 
 const raw = async (req: NextApiRequest, res: NextApiResponse) => {
   const path = req.query.path as string;
+  const readablePath = decode(path);
 
-  const readablePath = toReadablePath(path);
-  const file = await FileSystemService.getRawFile(readablePath);
+  if (getFileStat(await wd.stat(readablePath)).type === "directory") {
+    res.status(400).send("Cannot get directory");
+    return;
+  }
+
+  const file = wd.createReadStream(readablePath);
 
   res.setHeader("Content-Type", mime.getType(readablePath) || "text/plain");
-  res.setHeader("Content-Length", file.length);
-  res.send(file);
-  res.end();
+  res.status(200);
+  file.pipe(res);
 };
 
 export default raw;

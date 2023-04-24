@@ -6,25 +6,16 @@ export const FileToolbar = () => {
 
   if (!dispatch) throw new Error("No dispatch found!");
 
-  const handleNewFile = () => {
-    const name = prompt("Enter file name");
-
-    if (!name) return;
-
-    dispatch({
-      type: "ADD_FILE",
-      payload: {
-        id: Math.round(Math.random() * 100),
-        name: name,
-      },
-    });
-  };
-
   return (
     <nav>
-      <Button onClick={handleNewFile}>Add file</Button>
-
-      <Button onClick={() => dispatch({ type: "DELETE_FILE", payload: 0 })}>
+      <Button
+        onClick={() =>
+          dispatch({
+            type: "DELETE_FILE",
+            payload: "jack-dong-yJozLVBxNA0-unsplash.jpg",
+          })
+        }
+      >
         Delete first file
       </Button>
     </nav>

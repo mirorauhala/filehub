@@ -9,12 +9,9 @@
 const config = {
   reactStrictMode: true,
   swcMinify: true,
-  i18n: {
-    locales: ["en"],
-    defaultLocale: "en",
-  },
   experimental: {
     swcPlugins: [["next-superjson-plugin", {}]],
+    appDir: true,
   },
 };
 export default config;
