@@ -4,6 +4,16 @@ import prettyBytes from "pretty-bytes";
 import { type FileStat } from "webdav";
 import { FileActions } from "./FileActions";
 import { decodeClient, encodeClient } from "@/support/coding";
+import {
+  ContextMenuContent,
+  ContextMenuGroup,
+  ContextMenuItem,
+  ContextMenuLabel,
+  ContextMenuPortal,
+  ContextMenuRoot,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from "../ContextMenu";
 
 const File = ({ file }: { file: FileStat }) => {
   const router = useRouter();
@@ -27,23 +37,38 @@ const File = ({ file }: { file: FileStat }) => {
   };
 
   return (
-    <tr>
-      <td className="border border-slate-300 p-0.5">
-        <input type="checkbox" />
-      </td>
-      <td
-        className="cursor-pointer select-none border border-slate-300 p-0.5"
-        onDoubleClick={onDoubleClick}
-      >
-        {file.basename}
-      </td>
-      <td className="border border-slate-300 p-0.5">
-        {prettyBytes(file.size)}
-      </td>
-      <td className="border border-slate-300 p-0.5">
-        <FileActions file={file} />
-      </td>
-    </tr>
+    <ContextMenuRoot>
+      <ContextMenuTrigger asChild>
+        <tr>
+          <td className="border border-slate-300 p-0.5">
+            <input type="checkbox" />
+          </td>
+          <td
+            className="cursor-pointer select-none border border-slate-300 p-0.5"
+            onDoubleClick={onDoubleClick}
+          >
+            {file.basename}
+          </td>
+          <td className="border border-slate-300 p-0.5">
+            {prettyBytes(file.size)}
+          </td>
+          <td className="border border-slate-300 p-0.5">
+            <FileActions file={file} />
+          </td>
+        </tr>
+      </ContextMenuTrigger>
+
+      <ContextMenuPortal>
+        <ContextMenuContent>
+          <ContextMenuLabel>Actions</ContextMenuLabel>
+          <ContextMenuItem>Rename...</ContextMenuItem>
+
+          <ContextMenuItem>Download...</ContextMenuItem>
+          <ContextMenuSeparator />
+          <ContextMenuItem>Delete...</ContextMenuItem>
+        </ContextMenuContent>
+      </ContextMenuPortal>
+    </ContextMenuRoot>
   );
 };
 
