@@ -19,58 +19,69 @@ const incrementalMove = async (src: string, dst: string) => {
   } catch (e) {
     console.log(e);
   }
-
-  // do {
-  //   console.log(`Move: ${targetName}`);
-  //   await wd.moveFile(src, targetName);
-  //   i++;
-  //   targetName = `${dst}.${i}`;
-  // } while ();
+  return targetName;
 };
 
 export const fsRouter = router({
   move: publicProcedure
     .input(
       z.object({
-        filename: z.string(),
-        newName: z.string(),
+        src: z.string(),
+        dst: z.string(),
       })
     )
     .mutation(async ({ input }) => {
       try {
-        await wd.moveFile(input.filename, input.newName);
+        if (!(await wd.exists(input.src))) {
+          return {
+            success: false,
+            error: `Source file ${input.src} does not exist`,
+          };
+        }
+
+        if (await wd.exists(input.dst)) {
+          return {
+            success: false,
+            error: `Target file ${input.dst} already exists`,
+          };
+        }
+
+        await wd.moveFile(input.src, input.dst);
+
+        const movedFile = getFileStat(await wd.stat(input.dst));
+
+        return {
+          success: true,
+          data: movedFile,
+        };
       } catch (error) {
         return {
           success: false,
           error,
         };
       }
-
-      return {
-        success: true,
-      };
     }),
   moveToTrash: publicProcedure
     .input(z.object({ src: z.string() }).array().min(1))
     .mutation(async ({ input }) => {
       try {
-        input.forEach(async ({ src }) => {
-          console.log(`Trashing: ${src} to /.trash/${src}`);
+        input.map(async ({ src }) => {
+          console.log(`Trashing: ${src}`);
 
           const fileBasename = basename(src);
 
-          incrementalMove(src, `/.trash/${fileBasename}`);
+          await incrementalMove(src, `/.trash/${fileBasename}`);
         });
+
+        return {
+          success: true,
+        };
       } catch (error) {
         return {
           success: false,
           error,
         };
       }
-
-      return {
-        success: true,
-      };
     }),
   deletePermanently: publicProcedure
     .input(z.object({ src: z.string() }).array().min(1))

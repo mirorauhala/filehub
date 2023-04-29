@@ -1,5 +1,5 @@
 import { useParams, useRouter } from "next/navigation";
-import { useFiles } from "./FilesContext";
+import { useFiles, useFilesDispatch } from "./FilesContext";
 import prettyBytes from "pretty-bytes";
 import { type FileStat } from "webdav";
 import { FileActions } from "./FileActions";
@@ -18,12 +18,11 @@ import {
 const File = ({ file }: { file: FileStat }) => {
   const router = useRouter();
   const params = useParams();
+  const { actions } = useFiles();
+  const { slug } = params as { slug: string };
 
   const onDoubleClick = () => {
-    if (!params) return;
     if (file.type === "directory") {
-      const { slug } = params as { slug: string };
-
       const existingPath = decodeClient(slug) + "/" + file.basename;
 
       router.push(`/d/${encodeClient(existingPath)}`);
@@ -34,6 +33,26 @@ const File = ({ file }: { file: FileStat }) => {
 
       router.push(`/view/${encodeClient(existingPath)}`);
     }
+  };
+
+  const handleDownload = () => {
+    const path = decodeClient(slug);
+    const encodedFile = encodeClient(path + "/" + file.basename);
+
+    fetch(`/api/raw/${encodedFile}`, {
+      method: "GET",
+    })
+      .then((response) => response.blob())
+      .then((blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = file.basename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
   };
 
   return (
@@ -61,11 +80,17 @@ const File = ({ file }: { file: FileStat }) => {
       <ContextMenuPortal>
         <ContextMenuContent>
           <ContextMenuLabel>Actions</ContextMenuLabel>
-          <ContextMenuItem>Rename...</ContextMenuItem>
+          <ContextMenuItem onSelect={() => actions.rename(file)}>
+            Rename...
+          </ContextMenuItem>
 
-          <ContextMenuItem>Download...</ContextMenuItem>
+          <ContextMenuItem onSelect={handleDownload}>
+            Download...
+          </ContextMenuItem>
           <ContextMenuSeparator />
-          <ContextMenuItem>Delete...</ContextMenuItem>
+          <ContextMenuItem onSelect={() => actions.moveToTrash(file)}>
+            Move to trash...
+          </ContextMenuItem>
         </ContextMenuContent>
       </ContextMenuPortal>
     </ContextMenuRoot>
