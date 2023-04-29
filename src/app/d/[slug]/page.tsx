@@ -28,7 +28,7 @@ export default async function Page({
 
     return (
       <Shell activePage={getBrowserType(path)}>
-        <FileBrowser files={files} />
+        <FileBrowser files={files} path={path} />
       </Shell>
     );
   } catch (e) {

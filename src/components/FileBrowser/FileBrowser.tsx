@@ -13,9 +13,10 @@ import type { FileStat } from "webdav";
 
 type PageProps = {
   files: FileStat[];
+  path: string;
 };
 
-export default function FileBrowser({ files }: PageProps) {
+export default function FileBrowser({ files, path }: PageProps) {
   return (
     <AppLayout>
       <GlobalNav />
@@ -33,7 +34,7 @@ export default function FileBrowser({ files }: PageProps) {
 
         <div className="mx-auto w-full max-w-7xl">
           <Breadcrumbs path={"/"} />
-          <FilesProvider initialFiles={files}>
+          <FilesProvider initialFiles={files} path={path}>
             <FileToolbar />
             <FileTable />
           </FilesProvider>

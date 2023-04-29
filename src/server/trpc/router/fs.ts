@@ -3,6 +3,7 @@ import { z } from "zod";
 import { router, publicProcedure } from "../trpc";
 import { wd } from "@/server/webdav";
 import { basename } from "path";
+import { getFileStat } from "@/utils/webdav";
 
 const incrementalMove = async (src: string, dst: string) => {
   let i = 0;
@@ -28,7 +29,7 @@ const incrementalMove = async (src: string, dst: string) => {
 };
 
 export const fsRouter = router({
-  rename: publicProcedure
+  move: publicProcedure
     .input(
       z.object({
         filename: z.string(),
@@ -89,5 +90,32 @@ export const fsRouter = router({
       return {
         success: true,
       };
+    }),
+  createDirectory: publicProcedure
+    .input(z.object({ basename: z.string(), dst: z.string() }))
+    .mutation(async ({ input }) => {
+      try {
+        const path = `${input.dst}/${input.basename}`;
+
+        if (await wd.exists(path)) {
+          return {
+            success: false,
+            error: `Directory ${path} already exists`,
+          };
+        }
+
+        await wd.createDirectory(path);
+        const createdDirectory = getFileStat(await wd.stat(path));
+
+        return {
+          success: true,
+          data: createdDirectory,
+        };
+      } catch (error) {
+        return {
+          success: false,
+          error,
+        };
+      }
     }),
 });

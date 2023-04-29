@@ -73,7 +73,7 @@ const File = ({ file }: { file: FileStat }) => {
 };
 
 export function FileTable() {
-  const files = useFiles();
+  const { files } = useFiles();
 
   return (
     <table className="w-full border-collapse border border-slate-400">
