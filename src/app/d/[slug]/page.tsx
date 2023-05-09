@@ -1,5 +1,6 @@
 import FileBrowser from "@/components/FileBrowser/FileBrowser";
 import { Shell } from "@/components/Shell";
+import { db } from "@/server/db/db";
 import { wd } from "@/server/webdav";
 import { decode } from "@/support/coding";
 import { getFileStat } from "@/utils/webdav";
@@ -22,6 +23,13 @@ export default async function Page({
   searchParams?: { [key: string]: string | string[] | undefined };
 }) {
   const path = decode(params.slug);
+
+  const { id } = await db
+    .selectFrom("user")
+    .select("id")
+    .executeTakeFirstOrThrow();
+
+  console.log("userid:", id);
 
   try {
     const files = getFileStat<FileStat[]>(await wd.getDirectoryContents(path));
