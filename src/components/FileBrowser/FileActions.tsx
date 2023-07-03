@@ -2,11 +2,14 @@
 import { type FileStat } from "webdav";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { useFiles } from "./FilesContext";
-import { useShell } from "../Shell";
 
-export const FileActions = ({ file }: { file: FileStat }) => {
-  const { activePage } = useShell();
-
+export const FileActions = ({
+  file,
+  activePage,
+}: {
+  file: FileStat;
+  activePage: string;
+}) => {
   const { actions } = useFiles();
 
   return (

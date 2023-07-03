@@ -1,4 +1,3 @@
-import Link from "next/link";
 import Image from "next/image";
 import { AppLayout } from "@/components/Layouts";
 import { GlobalNav } from "@/components/Nav";

@@ -1,18 +1,13 @@
-import FileBrowser from "@/components/FileBrowser/FileBrowser";
-import { Shell } from "@/components/Shell";
+import { AppLayout } from "@/components/Layouts";
+import { type File, columns } from "./columns";
+import { DataTable } from "./data-table";
 import { wd } from "@/server/webdav";
-import { decode } from "@/support/coding";
+import { decode, encode } from "@/support/coding";
 import { getFileStat } from "@/utils/webdav";
 import { notFound } from "next/navigation";
 import { type FileStat } from "webdav";
-
-const getBrowserType = (page: string): Page => {
-  if (page.startsWith(".trash")) {
-    return "browser.trash";
-  }
-
-  return "browser.storage";
-};
+import { GlobalNav } from "@/components/Nav";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 
 export default async function Page({
   params,
@@ -22,17 +17,28 @@ export default async function Page({
   searchParams?: { [key: string]: string | string[] | undefined };
 }) {
   const path = decode(params.slug);
+  const files = getFileStat<FileStat[]>(await wd.getDirectoryContents(path));
+  const files2 = files.map(
+    (file) =>
+      ({
+        id: encode(file.filename),
+        basename: file.basename,
+        size: file.size,
+        type: file.type,
+        mime: file.mime,
+      } as File)
+  );
 
-  try {
-    const files = getFileStat<FileStat[]>(await wd.getDirectoryContents(path));
+  return (
+    <AppLayout>
+      <GlobalNav />
+      <main className="flex min-h-screen w-full flex-col">
+        <div className="mx-auto w-full max-w-7xl">
+          <Breadcrumbs path={"/"} />
 
-    return (
-      <Shell activePage={getBrowserType(path)}>
-        <FileBrowser files={files} path={path} />
-      </Shell>
-    );
-  } catch (e) {
-    console.error(e);
-    notFound();
-  }
+          <DataTable columns={columns} data={files2} />
+        </div>
+      </main>
+    </AppLayout>
+  );
 }

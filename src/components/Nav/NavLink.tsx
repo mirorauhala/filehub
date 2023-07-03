@@ -4,7 +4,6 @@ import { encode } from "@/support/coding";
 import clsx from "clsx";
 import Link from "next/link";
 import { type PropsWithChildren } from "react";
-import { useShell } from "../Shell";
 
 type NavLink = {
   href: string;
@@ -40,8 +39,11 @@ export const NavLink = ({
   </Link>
 );
 
-export const NavLeft = () => {
-  const { activePage } = useShell();
+type SharedNavProps = {
+  activePage: string;
+};
+
+export const NavLeft = ({ activePage }: SharedNavProps) => {
   const { navRef, hoverRef } = useHover<HTMLUListElement, HTMLDivElement>({
     left: 8,
   });
@@ -66,8 +68,7 @@ export const NavLeft = () => {
   );
 };
 
-export const NavRight = () => {
-  const { activePage } = useShell();
+export const NavRight = ({ activePage }: SharedNavProps) => {
   const { navRef, hoverRef } = useHover<HTMLUListElement, HTMLDivElement>({
     left: 8,
   });
