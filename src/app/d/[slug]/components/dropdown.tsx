@@ -1,4 +1,4 @@
-import { moveToTrash } from "../actions";
+import { moveToTrash, renameFile } from "../actions";
 import { MoreHorizontal } from "lucide-react";
 import {
   DropdownMenu,
@@ -24,13 +24,19 @@ export const FileDropdown = ({ file }: { file: File }) => {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-        <DropdownMenuItem onClick={() => console.log(file)}>
+        <DropdownMenuItem
+          onClick={async () => {
+            const name = prompt("Rename file", file.name);
+            if (!name) return;
+
+            await renameFile(file, name);
+          }}
+        >
           Rename
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={async () => {
-            if (!pathname) return;
             await moveToTrash(file);
           }}
         >
