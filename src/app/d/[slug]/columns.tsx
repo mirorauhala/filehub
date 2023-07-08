@@ -11,9 +11,7 @@ import {
   FileText,
   FileVideo,
   Folder,
-  FolderArchive,
-  LucideIcon,
-  MoreHorizontal,
+  type LucideIcon,
 } from "lucide-react";
 
 import type { ColumnDef } from "@tanstack/react-table";
@@ -105,7 +103,18 @@ export const columns: ColumnDef<File>[] = [
   },
   {
     accessorKey: "basename",
-    header: "Name",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="link"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="p-0"
+        >
+          Name
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
   },
   {
     accessorKey: "type",
@@ -122,7 +131,6 @@ export const columns: ColumnDef<File>[] = [
       );
     },
     cell: ({ row }) => (row.original.type === "directory" ? "Folder" : "File"),
-    size: 10,
   },
   {
     accessorKey: "size",
