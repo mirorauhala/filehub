@@ -71,9 +71,7 @@ const File = ({ file }: { file: FileStat }) => {
           <td className="border border-slate-300 p-0.5">
             {prettyBytes(file.size)}
           </td>
-          <td className="border border-slate-300 p-0.5">
-            <FileActions file={file} />
-          </td>
+          <td className="border border-slate-300 p-0.5"></td>
         </tr>
       </ContextMenuTrigger>
 

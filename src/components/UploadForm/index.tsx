@@ -1,6 +1,7 @@
 "use client";
 import { type FieldValues, useForm } from "react-hook-form";
 import { GlobalNav } from "../Nav";
+import { z } from "zod";
 
 export const UploadForm = () => {
   const { register, handleSubmit } = useForm();

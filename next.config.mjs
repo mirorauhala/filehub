@@ -12,6 +12,7 @@ const config = {
   experimental: {
     swcPlugins: [["next-superjson-plugin", {}]],
     appDir: true,
+    serverActions: true,
   },
 };
 export default config;

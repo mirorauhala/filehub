@@ -40,7 +40,7 @@ export const NavLink = ({
 );
 
 type SharedNavProps = {
-  activePage: string;
+  activePage: string | undefined;
 };
 
 export const NavLeft = ({ activePage }: SharedNavProps) => {
@@ -53,7 +53,7 @@ export const NavLeft = ({ activePage }: SharedNavProps) => {
       <Hover ref={hoverRef} className="z-0 rounded-md bg-neutral-200" />
       <ul className="z-10 flex flex-row" ref={navRef}>
         {links.map((link) => {
-          const isActive = link.isActive(activePage);
+          const isActive = activePage ? link.isActive(activePage) : false;
 
           return (
             <li key={link.href}>

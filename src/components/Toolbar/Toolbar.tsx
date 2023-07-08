@@ -33,19 +33,6 @@ export function Toolbar({
 
   if (!dispatch) throw new Error("No dispatch found!");
 
-  const handleNewFile = () => {
-    const name = window.prompt("Enter a name for the new file");
-    if (name) {
-      dispatch({
-        type: "ADD_FILE",
-        payload: {
-          id: Math.round(Math.random() * 100),
-          name: "hamster.jpg",
-        },
-      });
-    }
-  };
-
   if (activePage === "trash") {
     return (
       <div className="flex h-11 justify-between gap-2 px-4">
@@ -62,7 +49,6 @@ export function Toolbar({
   return (
     <div className="flex justify-between gap-2 px-4">
       <div className="flex gap-1">
-        <Button onClick={handleNewFile}>New...</Button>
         <Button>Upload...</Button>
         {selectionCount > 0 && (
           <>
