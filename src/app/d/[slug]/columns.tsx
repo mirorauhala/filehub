@@ -1,5 +1,9 @@
 "use client";
 import {
+  ArrowDown01,
+  ArrowDown10,
+  ArrowDownAZ,
+  ArrowDownZA,
   ArrowUpDown,
   File,
   FileArchive,
@@ -111,7 +115,13 @@ export const columns: ColumnDef<File>[] = [
           className="p-0"
         >
           Name
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          {column.getIsSorted() === false ? (
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          ) : column.getIsSorted() === "asc" ? (
+            <ArrowDownAZ className="ml-2 h-4 w-4" />
+          ) : (
+            <ArrowDownZA className="ml-2 h-4 w-4" />
+          )}
         </Button>
       );
     },
@@ -126,7 +136,13 @@ export const columns: ColumnDef<File>[] = [
           className="p-0 text-right"
         >
           Type
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          {column.getIsSorted() === false ? (
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          ) : column.getIsSorted() === "asc" ? (
+            <ArrowDownAZ className="ml-2 h-4 w-4" />
+          ) : (
+            <ArrowDownZA className="ml-2 h-4 w-4" />
+          )}
         </Button>
       );
     },
@@ -143,15 +159,27 @@ export const columns: ColumnDef<File>[] = [
             className="p-0 text-right"
           >
             Size
-            <ArrowUpDown className="ml-2 h-4 w-4" />
+            {column.getIsSorted() === false ? (
+              <ArrowUpDown className="ml-2 h-4 w-4" />
+            ) : column.getIsSorted() === "asc" ? (
+              <ArrowDown01 className="ml-2 h-4 w-4" />
+            ) : (
+              <ArrowDown10 className="ml-2 h-4 w-4" />
+            )}{" "}
           </Button>
         </div>
       );
     },
     cell: ({ row }) => {
+      const file = row.original;
+
+      if (file.type === "directory") {
+        return <div className="flex justify-end text-gray-500">&mdash;</div>;
+      }
+
       const pretty = prettyBytes(parseInt(row.getValue("size"), 10));
 
-      return <div className="text-right font-medium">{pretty}</div>;
+      return <div className="text-right text-gray-500">{pretty}</div>;
     },
   },
   {
