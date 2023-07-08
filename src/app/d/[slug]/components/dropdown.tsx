@@ -10,10 +10,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import type { File } from "../columns";
 import { Button } from "@/components/ui/button";
-import { usePathname } from "next/navigation";
 
 export const FileDropdown = ({ file }: { file: File }) => {
-  const pathname = usePathname();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -26,7 +24,7 @@ export const FileDropdown = ({ file }: { file: File }) => {
         <DropdownMenuLabel>Actions</DropdownMenuLabel>
         <DropdownMenuItem
           onClick={async () => {
-            const name = prompt("Rename file", file.name);
+            const name = prompt("Rename file", file.basename);
             if (!name) return;
 
             await renameFile(file, name);

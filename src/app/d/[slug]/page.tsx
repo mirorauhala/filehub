@@ -15,16 +15,22 @@ export default async function Page({
 }) {
   const path = decode(params.slug);
   const files = getFileStat<FileStat[]>(await wd.getDirectoryContents(path));
-  const files2 = files.map(
-    (file) =>
-      ({
-        id: encode(file.filename),
-        basename: file.basename,
-        size: file.size,
-        type: file.type,
-        mime: file.mime,
-      } as File)
-  );
+  const files2 = files
+    .map(
+      (file) =>
+        ({
+          id: encode(file.filename),
+          basename: file.basename,
+          size: file.size,
+          type: file.type,
+          mime: file.mime,
+        } as File)
+    )
+    .sort((a, b) => {
+      if (a.type === "directory" && b.type === "file") return -1;
+      if (a.type === "file" && b.type === "directory") return 1;
+      return a.basename.localeCompare(b.basename);
+    });
 
   return (
     <main className="flex min-h-screen w-full flex-col">

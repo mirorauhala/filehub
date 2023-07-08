@@ -1,5 +1,20 @@
 "use client";
-import { ArrowUpDown, MoreHorizontal } from "lucide-react";
+import {
+  ArrowUpDown,
+  File,
+  FileArchive,
+  FileAudio,
+  FileCode,
+  FileImage,
+  FileLineChart,
+  FileSpreadsheet,
+  FileText,
+  FileVideo,
+  Folder,
+  FolderArchive,
+  LucideIcon,
+  MoreHorizontal,
+} from "lucide-react";
 
 import type { ColumnDef } from "@tanstack/react-table";
 
@@ -39,8 +54,75 @@ export const columns: ColumnDef<File>[] = [
     enableHiding: false,
   },
   {
+    accessorKey: "file-type",
+    header: () => <div className="sr-only">File type</div>,
+    cell: ({ row }) => {
+      const file = row.original;
+
+      const getSimpleType = (type: string): LucideIcon => {
+        if (!type) return File;
+        if (type.includes("image")) {
+          return FileImage;
+        } else if (type.startsWith("video")) {
+          return FileVideo;
+        } else if (type.startsWith("audio")) {
+          return FileAudio;
+        } else if (type.startsWith("text")) {
+          return FileText;
+        } else if (type.startsWith("pdf")) {
+          return FileText;
+        } else if (type.startsWith("zip")) {
+          return FileArchive;
+        } else if (type.startsWith("msword")) {
+          return FileText;
+        } else if (type.startsWith("excel")) {
+          return FileSpreadsheet;
+        } else if (type.startsWith("powerpoint")) {
+          return FileLineChart;
+        } else if (type.startsWith("json")) {
+          return FileCode;
+        }
+
+        return File;
+      };
+
+      const Icon = getSimpleType(file.mime);
+
+      return (
+        <div data-type="icon">
+          {file.type === "directory" ? (
+            <div className="text-gray-500">
+              <Folder className="h-4 w-4" />
+            </div>
+          ) : (
+            <div className="text-gray-500">
+              <Icon className="h-4 w-4" />
+            </div>
+          )}
+        </div>
+      );
+    },
+  },
+  {
     accessorKey: "basename",
     header: "Name",
+  },
+  {
+    accessorKey: "type",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="link"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="p-0 text-right"
+        >
+          Type
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => (row.original.type === "directory" ? "Folder" : "File"),
+    size: 10,
   },
   {
     accessorKey: "size",
