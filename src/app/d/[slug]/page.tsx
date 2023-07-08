@@ -1,12 +1,9 @@
-import { AppLayout } from "@/components/Layouts";
 import { type File, columns } from "./columns";
 import { DataTable } from "./data-table";
 import { wd } from "@/server/webdav";
 import { decode, encode } from "@/support/coding";
 import { getFileStat } from "@/utils/webdav";
-import { notFound } from "next/navigation";
 import { type FileStat } from "webdav";
-import { GlobalNav } from "@/components/Nav";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 
 export default async function Page({
@@ -30,15 +27,12 @@ export default async function Page({
   );
 
   return (
-    <AppLayout>
-      <GlobalNav />
-      <main className="flex min-h-screen w-full flex-col">
-        <div className="mx-auto w-full max-w-7xl">
-          <Breadcrumbs path={"/"} />
+    <main className="flex min-h-screen w-full flex-col">
+      <div className="mx-auto w-full max-w-7xl">
+        <Breadcrumbs path={"/"} />
 
-          <DataTable columns={columns} data={files2} />
-        </div>
-      </main>
-    </AppLayout>
+        <DataTable columns={columns} data={files2} />
+      </div>
+    </main>
   );
 }
