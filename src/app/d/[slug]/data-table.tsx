@@ -7,6 +7,7 @@ import {
   getCoreRowModel,
   useReactTable,
   getSortedRowModel,
+  type Row,
 } from "@tanstack/react-table";
 
 import {
@@ -17,7 +18,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useState } from "react";
+import { type MouseEvent, useState } from "react";
+import { type File } from "@/app/d/[slug]/columns";
+import { useRouter } from "next/navigation";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -28,6 +31,7 @@ export function DataTable<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
+  const router = useRouter();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState({});
 
@@ -44,6 +48,23 @@ export function DataTable<TData, TValue>({
       rowSelection,
     },
   });
+
+  const rowClick = (row: Row<File>, e: MouseEvent<HTMLTableRowElement>) => {
+    if (!e.metaKey) {
+      table.resetRowSelection();
+    }
+    row.toggleSelected(!row.getIsSelected());
+  };
+
+  const rowDoubleClick = (row: Row<File>) => {
+    const file = row.original;
+
+    if (file.type === "directory") {
+      router.push(`/d/${row.original.id}`);
+    } else {
+      router.push(`/view/${row.original.id}`);
+    }
+  };
 
   return (
     <div className="rounded-md border">
@@ -67,11 +88,13 @@ export function DataTable<TData, TValue>({
           ))}
         </TableHeader>
         <TableBody>
-          {table.getRowModel().rows?.length ? (
+          {table.getRowModel().rows.length ? (
             table.getRowModel().rows.map((row) => (
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
+                onClick={(e) => rowClick(row, e)}
+                onDoubleClick={() => rowDoubleClick(row)}
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>

@@ -1,5 +1,4 @@
 import { wd } from "@/server/webdav";
-import { revalidatePath } from "next/cache";
 import { type NextRequest, NextResponse } from "next/server";
 
 const POST = async (req: NextRequest) => {
@@ -16,8 +15,6 @@ const POST = async (req: NextRequest) => {
       path + "/" + file.name,
       Buffer.from(await file.arrayBuffer()),
     );
-
-    revalidatePath("/d");
 
     return NextResponse.json({ revalidated: true, success: true });
   } catch (error) {

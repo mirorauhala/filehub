@@ -1,5 +1,5 @@
 export const decode = (dirpath: string) =>
-  Buffer.from(dirpath, "base64url").toString("utf-8");
+  Buffer.from(dirpath, "base64").toString("utf-8");
 
 export const encode = (dirpath: string) =>
   urlSafe(Buffer.from(dirpath).toString("base64"));

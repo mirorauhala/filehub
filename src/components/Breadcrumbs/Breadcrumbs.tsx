@@ -28,6 +28,7 @@ export function Breadcrumbs({ path }: BreadcrumbsProps) {
   const breadcrumbs = path
     .split("/")
     .filter(Boolean)
+    .slice(1)
     .map((name, index) => ({
       name,
       href: encode(
@@ -39,9 +40,23 @@ export function Breadcrumbs({ path }: BreadcrumbsProps) {
       ),
     }));
 
+  const getRootName = () => {
+    const root = path.split("/")[0];
+    switch (root) {
+      case ".trash":
+        return "Trash";
+      case "storage":
+        return "Files";
+      default:
+        return "Home";
+    }
+  };
+
   return (
     <ul className="flex p-4">
-      <Breadcrumb href="/">Files</Breadcrumb>
+      <Breadcrumb href={`/d/${encode(path.split("/")[0]!)}`}>
+        {getRootName()}
+      </Breadcrumb>
 
       {breadcrumbs.length > 0 &&
         breadcrumbs.map(({ name, href }) => (

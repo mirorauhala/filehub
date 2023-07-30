@@ -19,7 +19,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
           size: file.size,
           type: file.type,
           mime: file.mime,
-        }) as File,
+        } as File)
     )
     .sort((a, b) => {
       if (a.type === "directory" && b.type === "file") return -1;
@@ -30,7 +30,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
   return (
     <main className="flex min-h-screen w-full flex-col">
       <div className="mx-auto w-full max-w-7xl">
-        <Breadcrumbs path={"/"} />
+        <Breadcrumbs path={path} />
         <Upload path={path} />
 
         <DataTable columns={columns} data={files2} />
