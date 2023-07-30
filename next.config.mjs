@@ -10,7 +10,6 @@ const config = {
   reactStrictMode: true,
   swcMinify: true,
   experimental: {
-    swcPlugins: [["next-superjson-plugin", {}]],
     appDir: true,
     serverActions: true,
   },

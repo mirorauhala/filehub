@@ -1,6 +1,5 @@
 import type { PropsWithChildren } from "react";
 import { Button } from "../Button";
-import { useFilesDispatch } from "../FileBrowser";
 
 function ButtonRed(
   props: PropsWithChildren<React.ButtonHTMLAttributes<HTMLButtonElement>>

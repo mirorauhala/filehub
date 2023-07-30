@@ -11,7 +11,7 @@ If you are not familiar with the different technologies used in this project, pl
 - [Next.js](https://nextjs.org)
 - [NextAuth.js](https://next-auth.js.org)
 - [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+
 
 ## Learn More
 

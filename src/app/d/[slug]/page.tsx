@@ -5,14 +5,9 @@ import { decode, encode } from "@/support/coding";
 import { getFileStat } from "@/utils/webdav";
 import { type FileStat } from "webdav";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { Upload } from "@/app/d/[slug]/upload";
 
-export default async function Page({
-  params,
-  searchParams,
-}: {
-  params: { slug: string };
-  searchParams?: { [key: string]: string | string[] | undefined };
-}) {
+export default async function Page({ params }: { params: { slug: string } }) {
   const path = decode(params.slug);
   const files = getFileStat<FileStat[]>(await wd.getDirectoryContents(path));
   const files2 = files
@@ -24,7 +19,7 @@ export default async function Page({
           size: file.size,
           type: file.type,
           mime: file.mime,
-        } as File)
+        }) as File,
     )
     .sort((a, b) => {
       if (a.type === "directory" && b.type === "file") return -1;
@@ -36,6 +31,7 @@ export default async function Page({
     <main className="flex min-h-screen w-full flex-col">
       <div className="mx-auto w-full max-w-7xl">
         <Breadcrumbs path={"/"} />
+        <Upload path={path} />
 
         <DataTable columns={columns} data={files2} />
       </div>
