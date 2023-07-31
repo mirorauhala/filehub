@@ -5,6 +5,12 @@ import { redirectTo } from "@/utils/redirect";
 import { decode, encode, encodeClient } from "@/support/coding";
 import { getFileStat } from "@/utils/webdav";
 import { wd } from "@/server/webdav";
+import {
+  Slideshow,
+  SlideshowImage,
+  SlideshowInfo,
+  SlideshowToolbar,
+} from "@/app/view/[slug]/slideshow";
 
 export default async function ViewPage({
   params,
@@ -23,28 +29,12 @@ export default async function ViewPage({
   }
 
   return (
-    <>
-      <AppLayout>
-        <GlobalNav />
-        <main className="flex min-h-screen w-full flex-col">
-          <p>file</p>
-          <pre>{JSON.stringify(file, null, 2)}</pre>
-          <p>{download}</p>
-          <p>{`/api/raw/${encode(file.filename)}`}</p>
-
-          {/image/.test(file.mime || "") && (
-            <Image
-              src={`/api/raw/${encode(file.filename)}`}
-              alt=""
-              width={400}
-              height={533}
-              quality={75}
-            />
-          )}
-
-          {/* <Link href={`/api/raw/${fileMetadata.base64}`}>Raw</Link> */}
-        </main>
-      </AppLayout>
-    </>
+    <main>
+      <Slideshow>
+        <SlideshowToolbar file={file} />
+        <SlideshowImage file={file} />
+        {/* <SlideshowInfo file={file} /> */}
+      </Slideshow>
+    </main>
   );
 }
