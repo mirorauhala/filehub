@@ -22,12 +22,12 @@ import { type MouseEvent, useState } from "react";
 import { type File } from "@/app/d/[slug]/columns";
 import { useRouter } from "next/navigation";
 
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
+interface DataTableProps<TData> {
+  columns: ColumnDef<TData>[];
   data: TData[];
 }
 
-export function DataTable({ columns, data }: DataTableProps<File, File>) {
+export function DataTable({ columns, data }: DataTableProps<File>) {
   const router = useRouter();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState({});
@@ -76,7 +76,7 @@ export function DataTable({ columns, data }: DataTableProps<File, File>) {
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
-                          header.getContext()
+                          header.getContext(),
                         )}
                   </TableHead>
                 );

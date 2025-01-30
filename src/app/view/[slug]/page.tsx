@@ -12,14 +12,11 @@ import {
   SlideshowToolbar,
 } from "@/app/view/[slug]/slideshow";
 
-export default async function ViewPage({
-  params,
-  searchParams,
-}: {
-  params: { slug: string };
-  searchParams?: { [key: string]: string | string[] | undefined };
+export default async function ViewPage(props: {
+  params: Promise<{ slug: string }>;
 }) {
-  const path = decode(params.slug);
+  const { slug } = await props.params;
+  const path = decode(slug);
 
   const file = getFileStat(await wd.stat(path));
   const download = await wd.getFileDownloadLink(path);

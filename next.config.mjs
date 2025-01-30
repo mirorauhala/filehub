@@ -8,10 +8,5 @@
 /** @type {import("next").NextConfig} */
 const config = {
   reactStrictMode: true,
-  swcMinify: true,
-  experimental: {
-    appDir: true,
-    serverActions: true,
-  },
 };
 export default config;

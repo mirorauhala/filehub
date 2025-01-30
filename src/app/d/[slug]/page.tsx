@@ -7,8 +7,11 @@ import { type FileStat } from "webdav";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Upload } from "@/app/d/[slug]/upload";
 
-export default async function Page({ params }: { params: { slug: string } }) {
-  const path = decode(params.slug);
+type Params = Promise<{ slug: string }>;
+
+export default async function Page(props: { params: Params }) {
+  const { slug } = await props.params;
+  const path = decode(slug);
   const files = getFileStat<FileStat[]>(await wd.getDirectoryContents(path));
   const files2 = files
     .map(
@@ -19,7 +22,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
           size: file.size,
           type: file.type,
           mime: file.mime,
-        } as File)
+        }) as File,
     )
     .sort((a, b) => {
       if (a.type === "directory" && b.type === "file") return -1;
