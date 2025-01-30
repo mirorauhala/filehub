@@ -43,7 +43,7 @@ export const ContextMenuItem: typeof ContextMenuPrimitive.Item = forwardRef(
       <ContextMenuPrimitive.Item
         ref={forwardedRef}
         {...props}
-        className="group relative flex h-[25px] cursor-pointer select-none items-center rounded-[3px] px-[5px] pl-[25px] text-[13px] leading-none text-black outline-none disabled:cursor-not-allowed data-[disabled]:pointer-events-none data-[highlighted]:bg-blue-500 data-[disabled]:text-gray-300 data-[highlighted]:text-white"
+        className="group relative flex h-[25px] cursor-pointer select-none items-center rounded-[3px] px-[5px] pl-[25px] text-[13px] leading-none text-black outline-hidden disabled:cursor-not-allowed data-disabled:pointer-events-none data-highlighted:bg-blue-500 data-disabled:text-gray-300 data-highlighted:text-white"
       >
         {children}
       </ContextMenuPrimitive.Item>

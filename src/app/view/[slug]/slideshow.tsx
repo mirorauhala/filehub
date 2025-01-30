@@ -91,7 +91,7 @@ export const SlideshowInfo = ({
   children,
 }: PropsWithChildren<{ file: FileStat }>) => {
   return (
-    <div className="backdrop absolute left-1/2 top-1/2 z-20 h-60 w-60 -translate-x-1/2 -translate-y-1/2 p-4 text-white backdrop-blur">
+    <div className="backdrop absolute left-1/2 top-1/2 z-20 h-60 w-60 -translate-x-1/2 -translate-y-1/2 p-4 text-white backdrop-blur-sm">
       <ul>
         <li>Name: </li>
         <li>Mime: {file.mime}</li>
