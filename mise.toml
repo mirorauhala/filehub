@@ -1,2 +1,6 @@
 [env]
 WEBDAV_ENDPOINT = "http://127.0.0.1:8889/"
+
+[tools]
+node = "22.12.0"
+rclone = "1.69.0"
