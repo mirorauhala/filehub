@@ -7,7 +7,7 @@
     "dev": "next dev",
     "lint": "next lint",
     "start": "next start",
-    "webdav": "rclone serve webdav local:tmp --addr 127.0.0.1:8889 --user admin --pass cat123 --dir-cache-time 0"
+    "webdav": "rclone serve webdav local:tmp --addr 127.0.0.1:8889 --user admin --pass cat123 --dir-cache-time 10s -vvv"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.1.3",

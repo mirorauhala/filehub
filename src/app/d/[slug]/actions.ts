@@ -6,11 +6,33 @@ import { decode } from "@/support/coding";
 import { revalidatePath } from "next/cache";
 import { getFileStat } from "@/utils/webdav";
 
-export async function moveToTrash(file: File) {
-  if (!file) return { success: false, message: "File not found" };
+export async function moveToTrash(fileHandle: File) {
+  if (!fileHandle)
+    return { success: false, message: "File missing from request" };
 
-  console.log("Deleting ", decode(file.id));
-  await wd.deleteFile(decode(file.id));
+  // validate file exists
+  const file = getFileStat(await wd.stat(decode(fileHandle.id)));
+  if (!fileHandle) return { success: false, message: "File not found" };
+
+  console.log("Deleting ", decode(fileHandle.id));
+
+  // if the file is a directory, the whole directory is trashed.
+  //  if the file is a file, just the file is moved to the root of the trash
+  // @todo does not handle filename collisions
+  if (file.type === "directory") {
+    const oldFilepath = file.filename;
+    console.log("oldFilepath", oldFilepath);
+
+    const inherintFilename = file.filename.replace("/storage/", "");
+    await wd.moveFile(oldFilepath, `/.trash/${inherintFilename}`, {
+      overwrite: false,
+    });
+  } else {
+    const oldFilepath = file.filename;
+    await wd.moveFile(oldFilepath, `/.trash/${file.basename}`, {
+      overwrite: false,
+    });
+  }
 
   revalidatePath("/d");
 
