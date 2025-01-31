@@ -7,6 +7,8 @@ A file manager.
 
 ## Development Setup
 
+Make sure [`mise`](http://mise.jdx.dev/) is installed to get started.
+
 Installation steps are the following:
 
 ```
