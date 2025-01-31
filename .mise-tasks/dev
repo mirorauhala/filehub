@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -e
+#MISE description="Start the application"
+#MISE depends=["setup"]
+pnpm dev

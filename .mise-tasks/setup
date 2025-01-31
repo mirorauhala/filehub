@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -e
+#MISE description="Installing NPM dependencies"
+pnpm install

@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -e
+#MISE description="Start the application"
+rclone serve webdav local:tmp --addr 127.0.0.1:8889 --user admin --pass cat123 --dir-cache-time 10s -vvv
